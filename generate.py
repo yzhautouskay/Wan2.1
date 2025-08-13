@@ -18,6 +18,7 @@ import wan
 from wan.configs import MAX_AREA_CONFIGS, SIZE_CONFIGS, SUPPORTED_SIZES, WAN_CONFIGS
 from wan.utils.prompt_extend import DashScopePromptExpander, QwenPromptExpander
 from wan.utils.utils import cache_image, cache_video, str2bool
+from wan.utils.benchmark import benchmark_decorator
 
 
 EXAMPLE_PROMPT = {
@@ -243,6 +244,11 @@ def _parse_args():
         type=float,
         default=5.0,
         help="Classifier free guidance scale.")
+    parser.add_argument(
+        "--benchmark",
+        action="store_true",
+        help="Run the generation in benchmark mode. It means that generation will be rerun a few times and the average generation time will be shown.",
+    )
 
     args = parser.parse_args()
 
@@ -370,6 +376,11 @@ def generate(args):
 
         logging.info(
             f"Generating {'image' if 't2i' in args.task else 'video'} ...")
+
+        if args.benchmark:
+            logging.info("Running in benchmark mode...")
+            wan_t2v.generate = benchmark_decorator(profiling_iterations_count=1, warmup_iterations_count=0)(wan_t2v.generate)
+
         video = wan_t2v.generate(
             args.prompt,
             size=SIZE_CONFIGS[args.size],
@@ -426,6 +437,10 @@ def generate(args):
         )
 
         logging.info("Generating video ...")
+        if args.benchmark:
+            logging.info("Running in benchmark mode...")
+            wan_i2v.generate = benchmark_decorator(profiling_iterations_count=1, warmup_iterations_count=0)(wan_i2v.generate)
+
         video = wan_i2v.generate(
             args.prompt,
             img,
@@ -484,6 +499,10 @@ def generate(args):
         )
 
         logging.info("Generating video ...")
+        if args.benchmark:
+            logging.info("Running in benchmark mode...")
+            wan_flf2v.generate = benchmark_decorator(profiling_iterations_count=1, warmup_iterations_count=0)(wan_flf2v.generate)
+
         video = wan_flf2v.generate(
             args.prompt,
             first_frame,
@@ -538,6 +557,10 @@ def generate(args):
             ], args.frame_num, SIZE_CONFIGS[args.size], device)
 
         logging.info(f"Generating video...")
+        if args.benchmark:
+            logging.info("Running in benchmark mode...")
+            wan_vace.generate = benchmark_decorator(profiling_iterations_count=1, warmup_iterations_count=0)(wan_vace.generate)
+
         video = wan_vace.generate(
             args.prompt,
             src_video,

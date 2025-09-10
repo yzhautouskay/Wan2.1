@@ -249,6 +249,16 @@ def _parse_args():
         action="store_true",
         help="Run the generation in benchmark mode. It means that generation will be rerun a few times and the average generation time will be shown.",
     )
+    parser.add_argument(
+        '--benchmark_iters',
+        type=int,
+        default=2,
+        help='Number of iterations for benchmarking.')
+    parser.add_argument(
+        '--benchmark_warmup_iters',
+        type=int,
+        default=1,
+        help='Number of warmup iterations for benchmarking.')
 
     args = parser.parse_args()
 
@@ -379,7 +389,7 @@ def generate(args):
 
         if args.benchmark:
             logging.info("Running in benchmark mode...")
-            wan_t2v.generate = benchmark_decorator(profiling_iterations_count=1, warmup_iterations_count=0)(wan_t2v.generate)
+            wan_t2v.generate = benchmark_decorator(args.benchmark_iters, args.benchmark_warmup_iters)(wan_t2v.generate)
 
         video = wan_t2v.generate(
             args.prompt,
@@ -439,7 +449,7 @@ def generate(args):
         logging.info("Generating video ...")
         if args.benchmark:
             logging.info("Running in benchmark mode...")
-            wan_i2v.generate = benchmark_decorator(profiling_iterations_count=1, warmup_iterations_count=0)(wan_i2v.generate)
+            wan_i2v.generate = benchmark_decorator(args.benchmark_iters, args.benchmark_warmup_iters)(wan_i2v.generate)
 
         video = wan_i2v.generate(
             args.prompt,
@@ -501,7 +511,7 @@ def generate(args):
         logging.info("Generating video ...")
         if args.benchmark:
             logging.info("Running in benchmark mode...")
-            wan_flf2v.generate = benchmark_decorator(profiling_iterations_count=1, warmup_iterations_count=0)(wan_flf2v.generate)
+            wan_flf2v.generate = benchmark_decorator(args.benchmark_iters, args.benchmark_warmup_iters)(wan_flf2v.generate)
 
         video = wan_flf2v.generate(
             args.prompt,
@@ -559,7 +569,7 @@ def generate(args):
         logging.info(f"Generating video...")
         if args.benchmark:
             logging.info("Running in benchmark mode...")
-            wan_vace.generate = benchmark_decorator(profiling_iterations_count=1, warmup_iterations_count=0)(wan_vace.generate)
+            wan_vace.generate = benchmark_decorator(args.benchmark_iters, args.benchmark_warmup_iters)(wan_vace.generate)
 
         video = wan_vace.generate(
             args.prompt,
